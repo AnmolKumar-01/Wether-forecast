@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- this is the main card -->
+    <div class="card">
+
+        <!-- used for the seaching -->
+        <div class="search">
+            <input type="text" placeholder="Enter City Name" spellcheck="false">
+            
+            <button>
+                <img src="images/search.png" alt="">
+            </button>
+        </div>
+
+        <!-- in case user entered wrong city name this message will be shown -->
+        <div class="error">
+            <p>Invalid City Name</p>
+        </div>
+
+        <!-- contains temp , humidity , windspeed , this content will be hidden till user enters something -->
+        <div class="weather">
+            <img src="images/rain.png" class="weather-icon">
+            <h1 class="temp">16°c</h1>
+            <h2 class="city">Bangalore</h2>
+
+            <div class="humidity_wind_details ">
+
+                <div class="humidity_col col">
+                    <img src="images/humidity.png">
+                    <div>
+                        <p class="humidity">50%</p>
+                        <p>Humidity</p>
+                    </div>
+                </div>
+
+                <div class="wind_col col">
+                    <img src="images/wind.png">
+                    <div>
+                        <p class="wind">15 km/h</p>
+                        <p>Wind Speed</p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        const apiKey = "8fd2244f000b331ab6e965bf688370b6";
+        const apiUrl = "https://api.openweathermap.org/data/2.5/weather?&units=metric";
+        const input_field = document.querySelector('input');
+
+
+        async function checkWeather(city_name) {
+
+            // updating city , temp , humidity , wind values from api
+            const response = await fetch(apiUrl + `&q=${city_name}` + `&appid=${apiKey}`);
+
+            // if wrong city name is entered
+            if(response.status == 404 || city_name.trim() == ""){
+                document.querySelector('.error').style.display = 'block';
+                document.querySelector('.weather').style.display = 'none';
+            }
+            else{
+                var data = await response.json();
+
+                document.querySelector('.city').innerHTML = data.name;
+                document.querySelector('.temp').innerHTML = Math.round(data.main.temp) + "°c";
+                document.querySelector('.humidity').innerHTML = data.main.humidity + "%";
+                document.querySelector('.wind').innerHTML = data.wind.speed + " km/h";
+
+                // updating the weather images according to weather conditions
+                
+                const weather_icon = document.querySelector('.weather-icon');
+                const weather_condition = data.weather[0].main;
+
+                if(weather_condition == "Clouds" ){
+                    weather_icon.src = "images/clouds.png";
+                }
+                else if(weather_condition == "Clear" ){
+                    weather_icon.src = "images/clear.png";
+                }
+                else if(weather_condition == "Rain" ){
+                    weather_icon.src = "images/rain.png";
+                }
+                else if(weather_condition == "Drizzle" ){
+                    weather_icon.src = "images/drizzle.png";
+                }
+                else if(weather_condition == "Mist" ){
+                    weather_icon.src = "images/mist.png";
+                }
+
+                // changing display none(don't want to show) and block(want to show) 
+                document.querySelector('.weather').style.display = 'block';
+                document.querySelector('.error').style.display = 'none';
+                
+            }
+        }
+        
+        // on clicking the search icon i will update the details
+        const updating_values = function(e){
+
+            e.preventDefault();
+            const city_name = input_field.value;
+            checkWeather(city_name);
+
+            // making input field clear for the next value
+            input_field.value="";
+        
+        }
+
+        // updating values when i press enter in input tag
+        input_field.addEventListener('keydown',(e)=>{
+            if(e.key === "Enter"){
+                updating_values(e);
+            }
+        })
+
+        // updating values when i click on search icon
+        document.querySelector('button').addEventListener("click" , updating_values);  
+
+    </script>
+
+</body>
+</html>
